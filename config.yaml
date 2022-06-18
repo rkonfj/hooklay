@@ -19,7 +19,7 @@ relays:
     body: |
       {"branch": "{{.branch}}"}
     conditions:
-    - key: branch
+    - key: $.branch
       operator: Eq
       value: t2
   - name: android
@@ -28,7 +28,7 @@ relays:
     body: |
       {"targetBranch": "{{.target.branch}}"}
     conditions:
-    - key: target.branch
+    - key: $.target.branch
       operator: Eq
       value: t2
 

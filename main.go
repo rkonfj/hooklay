@@ -7,9 +7,11 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"text/template"
 
 	"github.com/kataras/iris/v12"
+	"github.com/oliveagle/jsonpath"
 )
 
 func main() {
@@ -43,6 +45,20 @@ func main() {
 				// Invoke Targets
 				for _, target := range relay.Targets {
 					if target.Enabled {
+						for _, condition := range target.Conditions {
+							if strings.EqualFold("eq", condition.Operator) {
+								value, err := jsonpath.JsonPathLookup(originalData, condition.Key)
+								if err != nil {
+									log.Fatal(err)
+									goto next
+								}
+								if value != condition.Value {
+									log.Printf("Condition failed: %s %s %s. Give up target %s\n",
+										value, condition.Operator, condition.Value, target.Name)
+									goto next
+								}
+							}
+						}
 						log.Println("Invoke target " + target.Url)
 						tpl := templateMap[target.Name]
 						if tpl == nil {
@@ -63,7 +79,9 @@ func main() {
 							log.Fatal(err)
 						}
 						log.Println(string(responseBody))
+
 					}
+				next:
 				}
 				ctx.JSON(iris.Map{"code": 200})
 			})
