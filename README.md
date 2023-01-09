@@ -1,37 +1,35 @@
-# WebHook Relay
+# Hooklay - webHook relay middleware
 
-### config like this
+### config
 ```yaml
-apiVersion: 1
 serverPort: 8080
-relays:
-- hook: /hook1
+hook: /dingtalk/alerts
+security:
+  token: 
+    header: Authorization
+    value: 123456
+templates:
+- name: mysqlaudit
+  content: |
+    {"type": "markdown", "msg": {"title", "{{.title}}", "content": "content1 {{.message}}"}}
+- name: javalogerror
+  content: |
+    {"type": "markdown", "msg": {"title", "{{.title}}", "content": "content2 {{.message}}"}}
+targets:
+- name: mysqlaudit
   enabled: true
-  security:
-    token: 
-      header: X-Gitlab-Token
-      value: 123456
-    signature:
-      method: HMAC
-      password: 123456
-      header: X-Signature
-  targets:
-  - name: test
-    enabled: true
-    url: https://igo.pub
-    body: |
-      {"branch": "{{.branch}}"}
-    conditions:
-    - key: branch
-      operator: Eq
-      value: t2
-  - name: android
-    enabled: true
-    url: https://igo.pub/signin
-    body: |
-      {"targetBranch": "{{.target.branch}}"}
-    conditions:
-    - key: target.branch
-      operator: Eq
-      value: t2
+  url: https://api.dingtalk.com/robot?ak=23249304329435945
+  bodyTemplate: mysqlaudit
+  conditions:
+  - key: $.alerts[0].labels.alert_type
+    operator: Eq
+    value: mysqlaudit
+- name: javalogerror
+  enabled: true
+  url: https://api.dingtalk.com/robot?ak=23249304329435945
+  bodyTemplate: javalogerror
+  conditions:
+  - key: $.alerts[0].labels.alert_type
+    operator: Eq
+    value: javalogerror
 ```

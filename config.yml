@@ -1,0 +1,20 @@
+serverPort: 8080
+hook: /dingtalk/alerts
+security:
+  token: 
+    header: Authorization
+    value: 123456
+templates:
+- name: mysqlaudit
+  content: |
+    {"type": "markdown", "msg": {"title", "{{.title}}", "content": "{{.message}}"}}
+targets:
+- name: mysqlaudit
+  enabled: true
+  url: https://api.dingtalk.com/robot?ak=23249304329435945
+  bodyTemplate: mysqlaudit
+  conditions:
+  - key: $.alerts[0].labels.alert_type
+    operator: Eq
+    value: mysqlaudit
+

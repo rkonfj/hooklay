@@ -1,103 +1,80 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
-	"strings"
-	"text/template"
 
 	"github.com/kataras/iris/v12"
-	"github.com/oliveagle/jsonpath"
+	"github.com/rkonfj/hooklay/internal"
+)
+
+var (
+	config        *internal.Config          = internal.NewConfig()
+	authenticator *internal.Authenticator   = internal.NewAuthenticator(config.Security.Token.Value)
+	cond          *internal.Conditions      = internal.NewConditions()
+	tplMan        *internal.TemplateManager = internal.NewTemplateManager(config.Templates)
 )
 
 func main() {
-	templateMap := make(map[string]*template.Template)
 	app := iris.New()
-	for _, relay := range config.Relays {
-		if relay.Enabled {
-			log.Println("Apply hook " + relay.Hook)
-			app.Post(relay.Hook, func(ctx iris.Context) {
-				body, err := ctx.GetBody()
-				if err != nil {
-					log.Fatal(err)
-					return
-				}
+	app.Post(config.Hook, handle)
+	log.Println("Hook ", config.Hook)
+	app.Listen(fmt.Sprintf(":%d", config.ServerPort))
+}
 
-				var originalData map[string]any
-				err = json.Unmarshal(body, &originalData)
-				if err != nil {
-					log.Fatal(err)
-					return
-				}
-				// Security Checks
-				token1 := ctx.URLParam("token")
-				token2 := ctx.GetHeader(relay.Security.Token.Header)
-				log.Println("Token1:" + token1 + " Token2:" + token2)
-				if token1 != relay.Security.Token.Value && token2 != relay.Security.Token.Value {
-					ctx.StatusCode(401)
-					ctx.JSON(iris.Map{"code": 401})
-					return
-				}
-				// Invoke Targets
-				for _, target := range relay.Targets {
-					if target.Enabled {
-						for _, condition := range target.Conditions {
-							if strings.EqualFold("eq", condition.Operator) {
-								value, err := jsonpath.JsonPathLookup(originalData, condition.Key)
-								if err != nil {
-									log.Println(err)
-									goto next
-								}
-								if value != condition.Value {
-									log.Printf("Condition failed: %s %s %s. Give up target %s\n",
-										value, condition.Operator, condition.Value, target.Name)
-									goto next
-								}
-							}
-						}
-						log.Println("Invoke target " + target.Url)
-						tpl := templateMap[target.Name]
-						if tpl == nil {
-							log.Fatal(err)
-							return
-						}
-						var bodyBuffer bytes.Buffer
-						err = tpl.Execute(&bodyBuffer, originalData)
-						if err != nil {
-							log.Fatal(err)
-						}
-						resp, err := http.Post(target.Url, "application/json;charset=utf-8", &bodyBuffer)
-						if err != nil {
-							log.Fatal(err)
-						}
-						responseBody, err := ioutil.ReadAll(resp.Body)
-						if err != nil {
-							log.Fatal(err)
-						}
-						log.Println(string(responseBody))
+func handle(ctx iris.Context) {
+	body, err := ctx.GetBody()
+	if err != nil {
+		log.Println("[error] get request body:", err)
+		ctx.StatusCode(400)
+		ctx.JSON(iris.Map{"code": 400})
+		return
+	}
 
-					}
-				next:
-				}
-				ctx.JSON(iris.Map{"code": 200})
-			})
-			for _, target := range relay.Targets {
-				if target.Enabled {
-					log.Println("Register target body template " + target.Name)
-					tpl, err := template.New(target.Name).Parse(target.Body)
-					if err != nil {
-						log.Fatal(err)
-						return
-					}
-					templateMap[target.Name] = tpl
-				}
-			}
+	var originalData map[string]any
+	err = json.Unmarshal(body, &originalData)
+	if err != nil {
+		log.Println("[error] parse body:", err)
+		return
+	}
+
+	// Security Checks
+	token1 := ctx.URLParam("token")
+	token2 := ctx.GetHeader(config.Security.Token.Header)
+	err = authenticator.Authenticate(token1)
+	if err != nil {
+		err = authenticator.Authenticate(token2)
+		if err != nil {
+			ctx.StatusCode(401)
+			ctx.JSON(iris.Map{"code": 401})
+			return
 		}
 	}
 
-	app.Listen(fmt.Sprintf(":%d", config.ServerPort))
+	// Invoke Targets
+	for _, target := range config.Targets {
+		if target.Enabled {
+			err := cond.Meet(originalData, target.Conditions)
+			if err != nil {
+				log.Println("[warn]", err)
+				continue
+			}
+			log.Println("Invoke target " + target.Url)
+			bodyBuffer := tplMan.Render(target.BodyTemplate, originalData)
+			resp, err := http.Post(target.Url, "application/json;charset=utf-8", bodyBuffer)
+			if err != nil {
+				log.Println("[error] execute:", err)
+				continue
+			}
+			responseBody, err := io.ReadAll(resp.Body)
+			if err != nil {
+				log.Println("[error] read:", err)
+			}
+			log.Println(string(responseBody))
+		}
+	}
+	ctx.JSON(iris.Map{"code": 200})
 }
