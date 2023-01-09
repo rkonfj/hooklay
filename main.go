@@ -49,7 +49,7 @@ func main() {
 							if strings.EqualFold("eq", condition.Operator) {
 								value, err := jsonpath.JsonPathLookup(originalData, condition.Key)
 								if err != nil {
-									log.Fatal(err)
+									log.Println(err)
 									goto next
 								}
 								if value != condition.Value {
