@@ -6,16 +6,19 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 
+	cache "github.com/go-pkgz/expirable-cache/v2"
 	"github.com/kataras/iris/v12"
 	"github.com/rkonfj/hooklay/internal"
 )
 
 var (
-	config        *internal.Config          = internal.NewConfig()
-	authenticator *internal.Authenticator   = internal.NewAuthenticator(config.Security.Token.Value)
-	cond          *internal.Conditions      = internal.NewConditions()
-	tplMan        *internal.TemplateManager = internal.NewTemplateManager(config.Templates)
+	config         *internal.Config          = internal.NewConfig()
+	authenticator  *internal.Authenticator   = internal.NewAuthenticator(config.Security.Token.Value)
+	cond           *internal.Conditions      = internal.NewConditions()
+	tplMan         *internal.TemplateManager = internal.NewTemplateManager(config.Templates)
+	idempotentKeys cache.Cache[string, any]  = cache.NewCache[string, any]().WithMaxKeys(4096).WithTTL(time.Second * 30)
 )
 
 func main() {
@@ -62,6 +65,13 @@ func handle(ctx iris.Context) {
 				log.Println("[warn]", err)
 				continue
 			}
+
+			idempotentKey := tplMan.Render(target.IdempotentTemplate, originalData).String()
+			if _, exists := idempotentKeys.Get(idempotentKey); exists {
+				log.Println("Invoke target ", target.Url, "(idempotent)")
+				continue
+			}
+
 			log.Println("Invoke target " + target.Url)
 			bodyBuffer := tplMan.Render(target.BodyTemplate, originalData)
 			resp, err := http.Post(target.Url, "application/json;charset=utf-8", bodyBuffer)
@@ -74,6 +84,8 @@ func handle(ctx iris.Context) {
 				log.Println("[error] read:", err)
 			}
 			log.Println(string(responseBody))
+
+			idempotentKeys.Set(idempotentKey, nil, 0)
 		}
 	}
 	ctx.JSON(iris.Map{"code": 200})

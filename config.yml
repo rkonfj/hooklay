@@ -8,11 +8,15 @@ templates:
 - name: mysqlaudit
   content: |
     {"type": "markdown", "msg": {"title", "{{.title}}", "content": "{{.message}}"}}
+- name: mysqlaudit-idempotent
+  content: |
+    {{.alerts[0].labels.query}}-{{.alerts[0].labels.date}}-{{.alerts[0].labels.user}}
 targets:
 - name: mysqlaudit
   enabled: true
   url: https://api.dingtalk.com/robot?ak=23249304329435945
   bodyTemplate: mysqlaudit
+  idempotentTemplate: mysqlaudit-idempotent
   conditions:
   - key: $.alerts[0].labels.alert_type
     operator: Eq

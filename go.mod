@@ -3,6 +3,7 @@ module github.com/rkonfj/hooklay
 go 1.18
 
 require (
+	github.com/go-pkgz/expirable-cache/v2 v2.0.0
 	github.com/kataras/iris/v12 v12.2.0-beta3.0.20220617190318-ef2643b04612
 	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852
 	gopkg.in/yaml.v3 v3.0.1

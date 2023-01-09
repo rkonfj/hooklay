@@ -38,9 +38,10 @@ type SecurityToken struct {
 }
 
 type RelayTarget struct {
-	Name         string
-	Enabled      bool
-	Url          string
-	BodyTemplate string
-	Conditions   []Condition
+	Name               string
+	Enabled            bool
+	Url                string
+	BodyTemplate       string
+	IdempotentTemplate string
+	Conditions         []Condition
 }
