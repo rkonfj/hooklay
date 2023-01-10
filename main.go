@@ -67,11 +67,11 @@ func handle(ctx iris.Context) {
 
 			idempotentKey := target.Name + tplMan.Render(target.IdempotentTemplate, originalData).String()
 			if _, exists := idempotentKeys.Get(idempotentKey); exists {
-				log.Println("Invoke target", target.Name, target.Url, "(idempotent:", idempotentKey, ")")
+				log.Println("Invoke target", target.Name, "(idempotent:", idempotentKey, ")")
 				continue
 			}
 
-			log.Println("Invoke target", target.Name, target.Url)
+			log.Println("Invoke target", target.Name)
 			bodyBuffer := tplMan.Render(target.BodyTemplate, originalData)
 			resp, err := http.Post(target.Url, "application/json;charset=utf-8", bodyBuffer)
 			if err != nil {
