@@ -41,7 +41,7 @@ type RelayTarget struct {
 	Name               string
 	Enabled            bool
 	Url                string
-	BodyTemplate       string
-	IdempotentTemplate string
+	BodyTemplate       string `yaml:"bodyTemplate"`
+	IdempotentTemplate string `yaml:"idempotentTemplate"`
 	Conditions         []Condition
 }
