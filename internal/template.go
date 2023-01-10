@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"time"
 )
 
 type Template struct {
@@ -35,6 +36,13 @@ func NewTemplateManager(templates []*Template) *TemplateManager {
 			},
 			"add": func(a, b int64) int64 {
 				return a + b
+			},
+			"utc2milli": func(utc string) int64 {
+				utcTime, err := time.Parse("2006-01-02T15:04:05Z", utc)
+				if err != nil {
+					return -1
+				}
+				return utcTime.UnixMilli()
 			},
 		}).Parse(t.Content)
 		if err != nil {
