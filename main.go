@@ -62,7 +62,6 @@ func handle(ctx iris.Context) {
 		if target.Enabled {
 			err := cond.Meet(originalData, target.Conditions)
 			if err != nil {
-				log.Println("[warn]", err)
 				continue
 			}
 
