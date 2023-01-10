@@ -82,9 +82,10 @@ func handle(ctx iris.Context) {
 			if err != nil {
 				log.Println("[error] read:", err)
 			}
-			log.Println(string(responseBody))
+			log.Println("Invoke response", string(responseBody))
 
 			idempotentKeys.Set(idempotentKey, nil, 0)
+			log.Println("IdempotentKeys Stats", idempotentKeys.Stat())
 		}
 	}
 	ctx.JSON(iris.Map{"code": 200})
