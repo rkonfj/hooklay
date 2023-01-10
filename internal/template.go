@@ -2,9 +2,11 @@ package internal
 
 import (
 	"bytes"
+	"crypto/md5"
 	"errors"
+	"fmt"
+	"html/template"
 	"log"
-	"text/template"
 )
 
 type Template struct {
@@ -20,7 +22,21 @@ func NewTemplateManager(templates []*Template) *TemplateManager {
 	templateMap := make(map[string]*template.Template)
 	for _, t := range templates {
 		log.Println("Register target body template " + t.Name)
-		tpl, err := template.New(t.Name).Parse(t.Content)
+		tpl, err := template.New(t.Name).Funcs(template.FuncMap{
+			"checksum": func(content string) string {
+				return fmt.Sprintf("%x", md5.Sum([]byte(content)))
+			},
+			"summary": func(content string, skip, length int) string {
+				runes := []rune(content)
+				if len(runes) > (skip + length) {
+					return string(runes[skip:skip+length-1]) + " ..."
+				}
+				return string(runes[skip:])
+			},
+			"add": func(a, b int64) int64 {
+				return a + b
+			},
+		}).Parse(t.Content)
 		if err != nil {
 			log.Fatal(err)
 		}
