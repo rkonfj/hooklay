@@ -38,10 +38,11 @@ type SecurityToken struct {
 }
 
 type RelayTarget struct {
-	Name               string
-	Enabled            bool
-	Url                string
-	BodyTemplate       string `yaml:"bodyTemplate"`
-	IdempotentTemplate string `yaml:"idempotentTemplate"`
-	Conditions         []Condition
+	Name                      string
+	Enabled                   bool
+	Url                       string
+	BodyTemplate              string `yaml:"bodyTemplate"`
+	IdempotentTemplate        string `yaml:"idempotentTemplate"`
+	IdempotentDruationSeconds int `yaml:idempotentDruationSeconds`
+	Conditions                []Condition
 }
