@@ -85,7 +85,7 @@ func handle(ctx iris.Context) {
 			log.Println("Invoke response", string(responseBody))
 
 			idempotentKeys.Set(idempotentKey, nil, time.Duration(target.IdempotentDruationSeconds) * time.Second)
-			log.Printf("IdempotentKeys Stats %v+\n", idempotentKeys.Stat())
+			log.Printf("IdempotentKeys Stats %+v\n", idempotentKeys.Stat())
 		}
 	}
 	ctx.JSON(iris.Map{"code": 200})
