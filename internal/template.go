@@ -63,6 +63,7 @@ func (m *TemplateManager) Render(templateName string, rawRequestBody map[string]
 	var bodyBuffer bytes.Buffer
 	err := tpl.Execute(&bodyBuffer, rawRequestBody)
 	if err != nil {
+		log.Println("body:", bodyBuffer.String())
 		log.Fatal(err)
 	}
 	return &bodyBuffer

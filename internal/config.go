@@ -43,6 +43,6 @@ type RelayTarget struct {
 	Url                       string
 	BodyTemplate              string `yaml:"bodyTemplate"`
 	IdempotentTemplate        string `yaml:"idempotentTemplate"`
-	IdempotentDruationSeconds int `yaml:idempotentDruationSeconds`
+	IdempotentDruationSeconds int    `yaml:"idempotentDruationSeconds"`
 	Conditions                []Condition
 }
