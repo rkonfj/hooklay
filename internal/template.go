@@ -27,8 +27,11 @@ func NewTemplateManager(templates []*Template) *TemplateManager {
 			"checksum": func(content string) string {
 				return fmt.Sprintf("%x", md5.Sum([]byte(content)))
 			},
-			"summary": func(content string, skip, length int) string {
-				runes := []rune(content)
+			"summary": func(content any, skip, length int) string {
+				if content == nil {
+					return "nil"
+				}
+				runes := []rune(fmt.Sprintf("%v", content))
 				if len(runes) > (skip + length) {
 					return string(runes[skip:skip+length-1]) + " ..."
 				}
