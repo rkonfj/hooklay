@@ -1,6 +1,7 @@
 # Hooklay - webHook relay middleware
-
-### config
+### Overview
+a tools forward web hook to other web hook endpoint with json render
+### Config
 ```yaml
 serverPort: 8080
 hook: /dingtalk/alerts
