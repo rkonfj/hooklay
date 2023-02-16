@@ -1,0 +1,40 @@
+kubeconfig: /home/rkonfj/.kube/config
+environments:
+  production: 
+    from: 
+      context: szsm
+      namespace: testing3
+    to: 
+      context: szprod
+      namespace: production
+    gitlabGroup: g1
+ignoreWarnning: false 
+jifa: https://jifa.developers.xiaomakai.com
+gitlab:
+  baseURL: https://gitlab.developers.xiaomakai.com/api/v4
+  token: NqvdhqFs581ozM6tMcj1
+  groups:
+    g1:
+      account: 208
+      order: 205
+      power: 212
+      food: 211
+      base: 210
+      admin: 209
+      integral: 207
+      openapi: 206
+      pay: 204
+    g2:
+      account: 40
+      order: 40
+      power: 41
+      food: 211
+      message: 40
+      admin: 40
+      integral: 40
+      openapi: 40
+      pay: 40
+      pos: 164
+notification:
+  dingtalk: https://oapi.dingtalk.com/robot/send?access_token=xxx
+

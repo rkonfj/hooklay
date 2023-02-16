@@ -1,12 +1,4 @@
-# A operations tool kit
-
-### 1. hooklay
-WebHook relay middleware. A tools forward web hook to other web hook endpoint with json render
-
-[README.md](cmd/hooklay/README.md)
-
-### 2. kdt
-Kubernetes based Deploy Tools.
+# Kubernetes based Deploy Tools
 
 ```
 # kdt --help
@@ -31,4 +23,3 @@ Flags:
 
 Use "kdt [command] --help" for more information about a command.
 ```
-[README.md](cmd/kdt/README.md)

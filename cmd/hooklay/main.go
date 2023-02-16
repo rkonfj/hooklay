@@ -10,7 +10,7 @@ import (
 
 	cache "github.com/go-pkgz/expirable-cache/v2"
 	"github.com/kataras/iris/v12"
-	"github.com/rkonfj/hooklay/internal"
+	"github.com/rkonfj/opkit/internal"
 )
 
 var (
@@ -84,7 +84,7 @@ func handle(ctx iris.Context) {
 			}
 			log.Println("Invoke response", string(responseBody))
 
-			idempotentKeys.Set(idempotentKey, nil, time.Duration(target.IdempotentDruationSeconds) * time.Second)
+			idempotentKeys.Set(idempotentKey, nil, time.Duration(target.IdempotentDruationSeconds)*time.Second)
 			log.Printf("IdempotentKeys Stats %+v\n", idempotentKeys.Stat())
 		}
 	}
