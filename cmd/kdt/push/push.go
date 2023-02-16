@@ -168,6 +168,7 @@ func waitDeploysSuccess(oldDeploys, newDeploys map[string]string, toCli typedapp
 	wg.Add(len(newDeploys))
 	for k, v := range newDeploys {
 		go func(deployName, oldImage, newImage string) {
+			defer wg.Done()
 			for {
 				rpcctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
@@ -181,7 +182,6 @@ func waitDeploysSuccess(oldDeploys, newDeploys map[string]string, toCli typedapp
 					break
 				}
 			}
-			wg.Done()
 			logrus.Info(deployName, " is ready")
 			projectId, exists := gitlabGroup[deployName]
 			if !exists {
