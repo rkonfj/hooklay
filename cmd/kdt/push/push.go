@@ -190,6 +190,9 @@ func waitDeploysSuccess(oldDeploys, newDeploys map[string]string, toCli typedapp
 			}
 			cl := gitlab.Changelog(internalutil.ParseCommitIDFromImage(oldImage), internalutil.ParseCommitIDFromImage(newImage), projectId)
 			logrus.Debug("oldImage ", oldImage, "; newImage ", newImage, "; projectId ", projectId, "; changelog ", cl)
+			if cl == "" {
+				cl = "No Changelog Found"
+			}
 			rw.Lock()
 			changelog.WriteString(fmt.Sprintf("### ** %s **\n", deployName))
 			changelog.WriteString(cl)
