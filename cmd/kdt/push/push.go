@@ -196,7 +196,7 @@ func waitDeploysSuccess(oldDeploys, newDeploys map[string]string, toCli typedapp
 			rw.Lock()
 			changelog.WriteString(fmt.Sprintf("### ** %s **\n", deployName))
 			changelog.WriteString(cl)
-			changelog.WriteString("\n---")
+			changelog.WriteString("\n---\n")
 			rw.Unlock()
 		}(k, oldDeploys[k], v)
 	}
