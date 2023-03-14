@@ -194,7 +194,7 @@ func waitDeploysSuccess(oldDeploys, newDeploys map[string]string, toCli typedapp
 				cl = "No Changelog Found"
 			}
 			rw.Lock()
-			changelog.WriteString(fmt.Sprintf("### ** %s **\n", deployName))
+			changelog.WriteString(fmt.Sprintf("### **%s**\n", deployName))
 			changelog.WriteString(cl)
 			changelog.WriteString("\n---\n")
 			rw.Unlock()
